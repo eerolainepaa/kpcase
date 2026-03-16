@@ -1,4 +1,6 @@
+<img width="1333" height="745" alt="PowerIntrestGrid" src="https://github.com/user-attachments/assets/230c3c4a-f5b3-4844-aee0-1c438b293724" />
 Guestions for the stakeholders
+
 
 ### Hotel CEO
 
