@@ -69,7 +69,6 @@ class Room:
             "entrance": ["entrance"],
             "living_room": ["living_room"]
         }
-        self.guest_present = False
 
     def enter_room(self, user: str):
         if self.user == user.staff:
@@ -79,9 +78,10 @@ class Room:
             lights.status = "on"
     
 
-
     def leave_room(self):
-        """"Tähän funkio kun poistutaan huoneesta = kaikki valot sammuu"""
+        for light in self.lights.values():
+            light.turn_off()
+        print("Room is empty, turning all lights off")
 
     def enter_area(self):
         """"Kun mennään johonkin arealle, vain se valo syttyy"""
