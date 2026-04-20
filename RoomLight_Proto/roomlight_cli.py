@@ -1,9 +1,17 @@
+"""
+RoomLight Prototype - CLI Simulation
+
+This is a prototype for Software production & Architecture - Mini project
+Kempowercase
+
+"""
+
 import cmd
 
 class Light:
     def __init__(self, position: str):
         self.position = position
-        self.status = "off" # Vaihtoehdot: "on", "off", "faulty"
+        self.status = "off" # "on", "off", "faulty"
         self.brightness = 0
 
     def turn_on(self, brightness: int = 100):
@@ -58,10 +66,10 @@ class Room:
         if role == "staff":
             for light in self.lights.values():
                 light.turn_on(100)
-            print("Henkilökunta saapui: Kaikki valot sytytetty (100%).")
+            print("Staff entered, Turn on all lights (100%).")
         elif role == "guest":
             self.lights["entrance"].turn_on(100)
-            print("Vieras saapui: Eteisen valo sytytetty.")
+            print("Guest entered, turn on entrance light")
 
     def leave_room(self):
         if self.occupants > 0:
@@ -71,31 +79,31 @@ class Room:
             for light in self.lights.values():
                 light.turn_off()
             self.current_user_role = None
-            print("Huone on tyhjä: Kaikki valot sammutettu.")
+            print("Room is empty, turn off all lights.")
         else:
-            print(f"Huoneessa on vielä {self.occupants} henkilöä.")
+            print(f"Room still has {self.occupants} person(s)")
 
     def enter_area(self, area: str):
         if area in self.lights:
             self.lights[area].turn_on(100)
-            print(f"Astuttu alueelle '{area}': Valo sytytetty.")
+            print(f"You step in '{area}': light on.")
         else:
-            print(f"Virhe: Aluetta '{area}' ei löydy.")
+            print(f"Error: Area '{area}' doesn't exists.")
 
     def leave_area(self, area: str):
         if area in self.lights:
             self.lights[area].turn_off()
-            print(f"Poistuttu alueelta '{area}': Valo sammutettu.")
+            print(f"Leaved area: '{area}': light off")
         else:
-            print(f"Virhe: Aluetta '{area}' ei löydy.")
+            print(f"Error: Area '{area}' doesn't exist.")
 
     def set_mood(self, mood: str):
         for light in self.lights.values():
             light.set_mood(mood)
-        print(f"Huoneen teemaksi asetettu: {mood}")
+        print(f"Room mood has been set: {mood}")
 
     def print_visual_map(self):
-        """Tulostaa huoneen ASCII-pohjapiirroksen."""
+        """Print ASCII - Floor plan of the room."""
         def get_icon(light_name):
             light = self.lights[light_name]
             if light.status == "faulty":
@@ -104,29 +112,29 @@ class Room:
                 return "\033[93m[*]\033[0m" # Keltainen
             return "[ ]"                    # Harmaa/valkoinen oletus
             
-        print("\n=== POHJAPIIRROS ===")
-        print(f"      KYLPYHUONE {get_icon('bathroom')} ")
+        print("\n=== Floor plan ===")
+        print(f"      BATHROOM {get_icon('bathroom')} ")
         print(f"         |         ")
-        print(f"       ETEINEN {get_icon('entrance')} ")
+        print(f"       ENTRANCE {get_icon('entrance')} ")
         print(f"         |         ")
-        print(f"     OLOHUONE {get_icon('living_room')} ")
+        print(f"     LIVING_ROOM {get_icon('living_room')} ")
         print(f"      /       \\   ")
-        print(f"SÄNKY {get_icon('bed')}     TYÖPÖYTÄ {get_icon('desk')}")
+        print(f"BED {get_icon('bed')}     DESK {get_icon('desk')}")
         print("====================\n")
 
     def print_dashboard(self):
-        """Tulostaa visuaalisen taulukon huollolle ANSI-väreillä."""
-        print("\n=== HUOLLON OHJAUSPANEELI ===")
-        print(f"Huoneen tila: {'Varattu' if self.occupants > 0 else 'Tyhjä'} (Henkilöitä: {self.occupants})")
-        print(f"Käyttäjärooli: {self.current_user_role if self.current_user_role else 'Ei ketään'}")
+        """Print visual board for maintenance using ANSI-colors"""
+        print("\n=== MAINTENANCE DASHBOARD ===")
+        print(f"Room Status: {'Occupied' if self.occupants > 0 else 'empty'} (Persons(s): {self.occupants})")
+        print(f"User role: {self.current_user_role if self.current_user_role else 'Nobody'}")
         print("-" * 45)
-        print(f"{'VALO':<15} | {'TILA':<15} | {'KIRKKAUS'}")
+        print(f"{'LIGHT':<15} | {'STATUS':<15} | {'BRIGHTNESS'}")
         print("-" * 45)
         
         for name, light in self.lights.items():
             raw_status = light.status.upper()
             
-            # Lisätään ANSI-koodit, mutta tehdään pad/tasaus raakatekstille
+            # Add ANSI-codes
             # jotta sarakkeet pysyvät suorassa (ANSI-koodit sotkevat len()-funktion)
             if light.status == "faulty":
                 status_text = f"\033[91m{raw_status:<15}\033[0m" 
@@ -140,7 +148,7 @@ class Room:
 
 
 class RoomLightCLI(cmd.Cmd):
-    intro = "\nRoomLight Prototyyppi käynnistetty.\nKirjoita 'help' tai '?' nähdäksesi komennot."
+    intro = "\nRoomLight Prototype started.\nType 'help' or '?' to see the commands"
     prompt = "(RoomLight) "
 
     def __init__(self):
@@ -148,66 +156,66 @@ class RoomLightCLI(cmd.Cmd):
         self.room = Room()
 
     def do_enter(self, arg):
-        """Astutaan huoneeseen. Käyttö: enter [guest|staff]"""
+        """Entering room. Use : enter [guest | staff]"""
         role = arg.strip().lower()
         if role not in ["guest", "staff"]:
-            print("Määritä rooli: 'enter guest' tai 'enter staff'")
+            print("Specify role: 'enter guest' or 'enter staff'")
             return
         self.room.enter_room(role)
 
     def do_leave(self, arg):
-        """Poistutaan huoneesta. Käyttö: leave"""
+        """Leaving room. cmd: leave"""
         self.room.leave_room()
 
     def do_area_enter(self, arg):
-        """Mennään tietylle alueelle. Käyttö: area_enter [bathroom|bed|desk|entrance|living_room]"""
+        """Enter area. Use: area_enter [bathroom|bed|desk|entrance|living_room]"""
         self.room.enter_area(arg.strip().lower())
 
     def do_area_leave(self, arg):
-        """Poistutaan tietyltä alueelta. Käyttö: area_leave [bathroom|bed|desk|entrance|living_room]"""
+        """Leave area. Use: area_leave [bathroom|bed|desk|entrance|living_room]"""
         self.room.leave_area(arg.strip().lower())
 
     def do_mood(self, arg):
-        """Asetetaan valaistusteema koko huoneeseen. Käyttö: mood [relax|working|wakeup|night]"""
+        """Set mood to room lighting. Use: mood [relax|working|wakeup|night]"""
         mood = arg.strip().lower()
         if mood not in ["relax", "working", "wakeup", "night"]:
-            print("Tuntematon teema. Vaihtoehdot: relax, working, wakeup, night")
+            print("Unknown mood. Choices: relax, working, wakeup, night")
             return
         self.room.set_mood(mood)
 
     def do_map(self, arg):
-        """Näyttää huoneen ASCII-pohjapiirroksen ja valojen visuaalisen tilan."""
+        """Show ASCII floor plan of the room and visual status of lights."""
         self.room.print_visual_map()
 
     def do_dashboard(self, arg):
-        """Näyttää huollon ohjauspaneelin (Status ja viat)."""
+        """Shom maintenance dashboard - Status and faults"""
         self.room.print_dashboard()
 
     def do_simulate_fault(self, arg):
-        """Simuloi vian halutussa valossa. Käyttö: simulate_fault [bathroom|bed|desk|entrance|living_room]"""
+        """Simulate fault in light. Use: simulate_fault [bathroom|bed|desk|entrance|living_room]"""
         light_name = arg.strip().lower()
         if light_name in self.room.lights:
             self.room.lights[light_name].set_fault()
-            print(f"Vika simuloitu valossa: {light_name}")
+            print(f"Fault simulated in: {light_name}")
         else:
-            print("Valoa ei löydy. Vaihtoehdot: bathroom, bed, desk, entrance, living_room")
+            print("Where is the fault? Choices: bathroom, bed, desk, entrance, living_room")
 
     def do_reset_fault(self, arg):
-        """Korjaa vian halutussa valossa. Käyttö: reset_fault [bathroom|bed|desk|entrance|living_room]"""
+        """Fix fault in light. Use: reset_fault [bathroom|bed|desk|entrance|living_room]"""
         light_name = arg.strip().lower()
         if light_name in self.room.lights:
             self.room.lights[light_name].reset_fault()
-            print(f"Vika korjattu valosta: {light_name}")
+            print(f"Fault fixed: {light_name}")
         else:
-            print("Valoa ei löydy. Vaihtoehdot: bathroom, bed, desk, entrance, living_room")
+            print("Reset light where? Choices: bathroom, bed, desk, entrance, living_room")
 
     def do_exit(self, arg):
-        """Sulkee simulaation."""
-        print("Suljetaan RoomLight...")
+        """Exit simulation."""
+        print("Closing RoomLight...")
         return True
     
     def default(self, line):
-        print(f"Tuntematon komento: '{line}'. Kirjoita 'help' nähdäksesi listan komennoista.")
+        print(f"Unknown command: '{line}'. Write 'help' for list of commands.")
 
 if __name__ == '__main__':
     RoomLightCLI().cmdloop()
